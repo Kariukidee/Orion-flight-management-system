@@ -1,0 +1,1109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Admin Dashboard - Orion Flights</title>
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    /* Global Styles */
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #f4f6f9;
+    }
+    /* Top Navbar */
+    .navbar {
+      background-color: #007BFF;
+    }
+    .navbar-brand, .navbar-nav .nav-link {
+      color: #fff !important;
+    }
+    /* Sidebar */
+    .sidebar {
+      background-color: #343a40;
+      min-height: 100vh;
+      padding-top: 1rem;
+    }
+    .sidebar a {
+      color: #fff;
+      text-decoration: none;
+      padding: 10px 20px;
+      display: block;
+      cursor: pointer;
+    }
+    .sidebar a:hover, .sidebar a.active {
+      background-color: #FFA500;
+      color: #fff;
+    }
+    /* Main Content Area */
+    .content {
+      padding: 20px;
+    }
+    .card-header {
+      background-color: #FFA500 !important;
+      color: #fff;
+    }
+    table {
+      font-size: 0.9rem;
+    }
+    .hidden {
+      display: none !important;
+    }
+    /* New Manage Bookings Filter Section */
+    #bookingsSortFilter {
+      margin-bottom: 1rem;
+      padding: 10px;
+      border: 1px solid #ddd;
+      background-color: #fff;
+    }
+    #bookingsSortFilter label {
+      font-weight: bold;
+    }
+    #bookingsSortFilter .form-control {
+      display: inline-block;
+      width: auto;
+      margin-right: 10px;
+      vertical-align: middle;
+    }
+  </style>
+</head>
+<body>
+  <!-- Top Navigation Bar -->
+  <nav class="navbar navbar-expand-lg">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#">Orion Flights - Admin Dashboard</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#adminNavbar">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="adminNavbar">
+        <form class="d-flex ms-auto">
+          <input class="form-control me-2" type="search" placeholder="Search Bookings" aria-label="Search">
+          <button class="btn btn-outline-light" type="submit">Search</button>
+        </form>
+        <div class="d-flex ms-3">
+          <a href="logout.html" class="btn btn-outline-light">Logout</a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Page Layout -->
+  <div class="container-fluid mt-3">
+    <div class="row">
+      <!-- Sidebar Navigation -->
+      <nav class="col-md-2 sidebar">
+        <h5 class="text-white ps-3">Navigation</h5>
+        <a id="dashboardLink" class="active">Dashboard</a>
+        <a id="bookingsLink">Manage Bookings</a>
+        <a id="usersLink">Manage Users</a>
+        <a id="revenueLink">Revenue Analytics</a>
+        <a id="travelLink">Travel Analytics</a>
+        <a id="reportsLink">Reports</a>
+        <a id="settingsLink">Settings</a>
+      </nav>
+      <!-- Main Content Area -->
+      <main class="col-md-10 content">
+        <!-- Dashboard Section -->
+        <div id="dashboardSection">
+          <h2>Dashboard Overview</h2>
+          <div class="row mb-3">
+            <!-- Total Bookings -->
+            <div class="col-md-4">
+              <div class="card">
+                <div class="card-header">Total Bookings</div>
+                <div class="card-body">
+                  <h3 id="totalBookings">0</h3>
+                </div>
+              </div>
+            </div>
+            <!-- Revenue Collected -->
+            <div class="col-md-4">
+              <div class="card">
+                <div class="card-header">Revenue Collected</div>
+                <div class="card-body">
+                  <h3 id="revenueCollected">Ksh 0</h3>
+                </div>
+              </div>
+            </div>
+            <!-- Popular Destination -->
+            <div class="col-md-4">
+              <div class="card">
+                <div class="card-header">Popular Destination</div>
+                <div class="card-body">
+                  <h3 id="popularDestination">-</h3>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Dashboard Charts -->
+          <div class="row">
+            <!-- Revenue Trends Chart -->
+            <div class="col-md-6">
+              <div class="card mb-3">
+                <div class="card-header">Revenue Trends</div>
+                <div class="card-body">
+                  <canvas id="revenueChart"></canvas>
+                </div>
+              </div>
+            </div>
+            <!-- Travel Trends Chart -->
+            <div class="col-md-6">
+              <div class="card mb-3">
+                <div class="card-header">Travel Trends</div>
+                <div class="card-body">
+                  <canvas id="travelChart"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Manage Bookings Section -->
+        <div id="bookingsSection" class="hidden">
+          <h2>Manage Bookings</h2>
+          <div class="mb-3">
+            <input type="text" id="bookingsSearchInput" class="form-control" placeholder="Search Bookings (by amount, destination, date, etc.)">
+          </div>
+          <!-- New Filter/Sort Options -->
+          <div id="bookingsSortFilter">
+            <label for="flightTypeFilter">Flight Type:</label>
+            <select id="flightTypeFilter" class="form-control">
+              <option value="">All</option>
+              <option value="economy">Economy</option>
+              <option value="business">Business</option>
+              <option value="first">First</option>
+            </select>
+            <label>Total Cost:</label>
+            <input type="number" id="minCostFilter" class="form-control" placeholder="Min">
+            <input type="number" id="maxCostFilter" class="form-control" placeholder="Max">
+            <label>Min Passengers:</label>
+            <input type="number" id="minPassengersFilter" class="form-control" placeholder="Min">
+            <button id="applyBookingFilters" class="btn btn-primary">Apply Filters</button>
+            <div id="totalBookingsFiltered" class="mt-2"></div>
+          </div>
+          <button id="refreshBookingsBtn" class="btn btn-secondary mb-3">Refresh Bookings</button>
+          <div id="bookingsTableContainer"></div>
+        </div>
+
+        <!-- Manage Users Section -->
+        <div id="usersSection" class="hidden">
+          <h2>Manage Users</h2>
+          <!-- Add User Button -->
+          <button id="addUserBtn" class="btn btn-success mb-3">Add User</button>
+          <div class="mb-3">
+            <input type="text" id="usersSearchInput" class="form-control" placeholder="Search Users by name, email...">
+          </div>
+          <button id="refreshUsersBtn" class="btn btn-secondary mb-3">Refresh Users</button>
+          <div id="usersTableContainer"></div>
+        </div>
+
+        <!-- Revenue Analytics Section -->
+        <div id="revenueSection" class="hidden">
+          <h2>Revenue Analytics</h2>
+          <p>Select a date range and filter revenue by amount or destination.</p>
+          <div class="row mb-3">
+            <div class="col-md-4">
+              <label>Date From:</label>
+              <input type="date" id="revenueDateFrom" class="form-control">
+            </div>
+            <div class="col-md-4">
+              <label>Date To:</label>
+              <input type="date" id="revenueDateTo" class="form-control">
+            </div>
+            <div class="col-md-4">
+              <label>Min Amount (Ksh):</label>
+              <input type="number" id="minRevenue" class="form-control" placeholder="0">
+            </div>
+          </div>
+          <button id="filterRevenueBtn" class="btn btn-secondary mb-3">Filter Revenue</button>
+          <!-- Display total revenue for selected period -->
+          <div id="totalRevenueDisplay" class="mb-3"></div>
+          <!-- Revenue Report Table -->
+          <div id="revenueReportContainer"></div>
+          <!-- New Revenue Analytics Charts -->
+          <div id="revenueAnalyticsCharts" class="row">
+            <div class="col-md-6">
+              <div class="card mb-3">
+                <div class="card-header">Revenue by Departure</div>
+                <div class="card-body">
+                  <canvas id="revenueDepartureChart"></canvas>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="card mb-3">
+                <div class="card-header">Revenue by Destination</div>
+                <div class="card-body">
+                  <canvas id="revenueDestinationChart"></canvas>
+                </div>
+              </div>
+            </div>
+            <!-- New Chart: Revenue by Departure-Destination Combination -->
+            <div class="col-md-12">
+              <div class="card mb-3">
+                <div class="card-header">Revenue by Departure-Destination Combination</div>
+                <div class="card-body">
+                  <canvas id="revenueDepDestChart"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Travel Analytics Section -->
+        <<div id="travelAnalyticsSection" class="hidden">
+          <h2>Travel Analytics</h2>
+          <p>Analyze flight trends, class preferences, and passenger demographics.</p>
+          <div id="travelAnalyticsReportContainer"> 
+            <!-- Existing detailed travel chart for Class Preferences -->
+            <canvas id="detailedTravelChart"></canvas> 
+            <!-- New chart for travel classes (if separate from detailed chart) -->
+            < <canvas id="travelClassChart" style="margin-top: 20px;"></canvas> 
+            <!-- New chart for Passenger Count per Booking -->
+             <canvas id="passengerCountChart" style="margin-top: 20px;"></canvas> 
+            <!-- New Chart: Total Travellers per Month -->
+             <canvas id="travellersPerMonthChart" style="margin-top: 20px;"></canvas>
+          </div>
+        </div> 
+
+        <!-- Reports Section -->
+        <div id="reportsSection" class="hidden">
+          <h2>Reports</h2>
+          <p>Generate and export reports by date ranges. (Export functionality can be integrated.)</p>
+          <div class="row mb-3">
+            <div class="col-md-4">
+              <label>Report Date From:</label>
+              <input type="date" id="reportDateFrom" class="form-control">
+            </div>
+            <div class="col-md-4">
+              <label>Report Date To:</label>
+              <input type="date" id="reportDateTo" class="form-control">
+            </div>
+          </div>
+          <button id="generateReportBtn" class="btn btn-secondary mb-3">Generate Report</button>
+          <div id="reportContainer"></div>
+        </div>
+
+        <!-- Settings Section -->
+        <div id="settingsSection" class="hidden">
+          <h2>Settings</h2>
+          <form id="settingsForm">
+            <div class="mb-3">
+              <label for="defaultCurrency" class="form-label">Default Currency</label>
+              <input type="text" id="defaultCurrency" class="form-control" value="Ksh">
+            </div>
+            <div class="mb-3">
+              <label for="notificationEmail" class="form-label">Notification Email</label>
+              <input type="email" id="notificationEmail" class="form-control" placeholder="admin@example.com">
+            </div>
+            <div class="mb-3">
+              <label for="backupFrequency" class="form-label">Backup Frequency (days)</label>
+              <input type="number" id="backupFrequency" class="form-control" value="7">
+            </div>
+            <button type="submit" class="btn btn-primary">Save Settings</button>
+          </form>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script type="module">
+    /*
+      NOTE: This integration uses Firebase Firestore for data retrieval.
+      Replace YOUR_API_KEY, etc. with your Firebase project's config.
+    */
+
+    // Firebase imports (including addDoc for adding new users)
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+    import { getFirestore, collection, getDocs, updateDoc, deleteDoc, doc, addDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+    
+    // Firebase configuration – replace with your values
+    const firebaseConfig = {
+      apiKey: "AIzaSyDB6zVp5bJtqrNVMDX-wS7plX2RDDS80y4",
+      authDomain: "orion-flights.firebaseapp.com",
+      projectId: "orion-flights",
+      storageBucket: "orion-flights.appspot.com",
+      messagingSenderId: "679154147535",
+      appId: "1:679154147535:web:5771584a3cc7cf143517ba"
+    };
+    
+    // Initialize Firebase
+    const appFirebase = initializeApp(firebaseConfig);
+    const db = getFirestore(appFirebase);
+    
+    // Global variables for bookings, users, and charts
+    let currentBookings = [];
+    let currentUsers = [];
+    let currentSortColumn = null;
+    let currentSortOrder = 'asc';
+    let revenueChart;
+    let travelChart;
+    let detailedTravelChart;
+    
+    // New global variables for additional charts
+    // Revenue charts for departure/destination and their combination, passenger count, travel class, monthly travellers
+    let revenueDepartureChart, revenueDestinationChart, revenueDepDestChart, travellerPerMonthChart;
+    // Optional: travelClassChart and passengerCountChart are created below
+    
+    /***** Dashboard Functions *****/
+    function updateDashboardMetrics(bookings) {
+      // Total Bookings
+      document.getElementById("totalBookings").innerText = bookings.length;
+      // Revenue and popular destination calculations
+      let totalRevenue = 0;
+      let destCount = {};
+      bookings.forEach(b => {
+        let rawPrice = (b.totalPrice || "").toString();
+        let price = parseFloat(rawPrice.replace(/[^0-9.]/g, "")) || 0;
+        totalRevenue += price;
+        if (b.destination) {
+          destCount[b.destination] = (destCount[b.destination] || 0) + 1;
+        }
+      });
+      document.getElementById("revenueCollected").innerText = "Ksh " + totalRevenue.toLocaleString();
+      let popularCity = "-";
+      let maxCount = 0;
+      for (const city in destCount) {
+        if (destCount[city] > maxCount) {
+          popularCity = city;
+          maxCount = destCount[city];
+        }
+      }
+      document.getElementById("popularDestination").innerText = popularCity;
+    }
+    
+    /***** Bookings Table Functions *****/
+    function filterBookings(bookings, query) {
+      return bookings.filter(b => {
+        const combined = ((b.departure || "") + " " + (b.destination || "") + " " + (b.travelDate || "") + " " + (b.totalPrice || "")).toLowerCase();
+        return combined.includes(query.toLowerCase());
+      });
+    }
+    
+    function renderBookingsTable(data) {
+      const container = document.getElementById("bookingsTableContainer");
+      if (!data.length) {
+        container.innerHTML = "<p>No bookings found.</p>";
+        return;
+      }
+      let html = `
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th onclick="sortBookings('departure')">From &#x25B2;&#x25BC;</th>
+              <th onclick="sortBookings('destination')">To &#x25B2;&#x25BC;</th>
+              <th onclick="sortBookings('travelDate')">Date &#x25B2;&#x25BC;</th>
+              <th>Passengers</th>
+              <th onclick="sortBookings('totalPrice')">Total Price &#x25B2;&#x25BC;</th>
+              <th>Flight Type</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+      `;
+      data.forEach(b => {
+        let passengerBtn = '-';
+        if (b.passengerDetails && Array.isArray(b.passengerDetails) && b.passengerDetails.length > 0) {
+          passengerBtn = `<button class="btn btn-info btn-sm" onclick='viewPassengerDetails(${JSON.stringify(b.passengerDetails)})'>View</button>`;
+        }
+        html += `
+          <tr>
+            <td>${b.departure || '-'}</td>
+            <td>${b.destination || '-'}</td>
+            <td>${b.travelDate || '-'}</td>
+            <td>${passengerBtn}</td>
+            <td>${b.totalPrice || '-'}</td>
+            <td>${b.flightType || '-'}</td>
+            <td>
+              <button class="btn btn-primary btn-sm me-1" onclick="editBooking('${b.id}')">Edit</button>
+              <button class="btn btn-danger btn-sm me-1" onclick="deleteBooking('${b.id}')">Delete</button>
+              <button class="btn btn-secondary btn-sm me-1" onclick="rescheduleBooking('${b.id}')">Reschedule</button>
+              <button class="btn btn-warning btn-sm" onclick="cancelBooking('${b.id}')">Cancel</button>
+            </td>
+          </tr>
+        `;
+      });
+      html += "</tbody></table>";
+      container.innerHTML = html;
+    }
+    
+    window.sortBookings = function(column) {
+      if (currentSortColumn === column) {
+        currentSortOrder = currentSortOrder === 'asc' ? 'desc' : 'asc';
+      } else {
+        currentSortColumn = column;
+        currentSortOrder = 'asc';
+      }
+      currentBookings.sort((a, b) => {
+        let v1 = a[column] || "";
+        let v2 = b[column] || "";
+        if (column === "totalPrice") {
+          v1 = parseFloat(String(v1).replace(/[^0-9.]/g, "")) || 0;
+          v2 = parseFloat(String(v2).replace(/[^0-9.]/g, "")) || 0;
+        } else {
+          if (!isNaN(parseFloat(v1)) && !isNaN(parseFloat(v2))) {
+            v1 = parseFloat(v1);
+            v2 = parseFloat(v2);
+          }
+        }
+        if (v1 < v2) return currentSortOrder === 'asc' ? -1 : 1;
+        if (v1 > v2) return currentSortOrder === 'asc' ? 1 : -1;
+        return 0;
+      });
+      const query = document.getElementById("bookingsSearchInput").value;
+      const filtered = query ? filterBookings(currentBookings, query) : currentBookings;
+      renderBookingsTable(filtered);
+    };
+    
+    // New function: Filter Bookings Based on Additional Criteria
+    function applyBookingFilters() {
+      let filtered = currentBookings;
+      // Filter by Flight Type if provided
+      const flightType = document.getElementById("flightTypeFilter").value;
+      if (flightType) {
+        filtered = filtered.filter(b => (b.flightType || "").toLowerCase() === flightType.toLowerCase());
+      }
+      // Filter by Total Cost
+      const minCost = parseFloat(document.getElementById("minCostFilter").value) || 0;
+      const maxCost = parseFloat(document.getElementById("maxCostFilter").value) || Infinity;
+      filtered = filtered.filter(b => {
+        let price = parseFloat((b.totalPrice || "").toString().replace(/[^0-9.]/g, "")) || 0;
+        return price >= minCost && price <= maxCost;
+      });
+      // Filter by Minimum Number of Passengers
+      const minPassengers = parseInt(document.getElementById("minPassengersFilter").value) || 0;
+      filtered = filtered.filter(b => {
+        const count = (b.passengerDetails && Array.isArray(b.passengerDetails)) ? b.passengerDetails.length : 0;
+        return count >= minPassengers;
+      });
+      // Update table with filtered bookings
+      renderBookingsTable(filtered);
+      // Display total count of filtered bookings
+      document.getElementById("totalBookingsFiltered").innerText = `Total Bookings Matching Criteria: ${filtered.length}`;
+    }
+    
+    document.getElementById("applyBookingFilters").addEventListener("click", applyBookingFilters);
+    
+    /***** Users Table Functions *****/
+    function filterUsers(users, query) {
+      return users.filter(u => {
+        const combined = ((u.name || "") + " " + (u.email || "")).toLowerCase();
+        return combined.includes(query.toLowerCase());
+      });
+    }
+    
+    function renderUsersTable(data) {
+      const container = document.getElementById("usersTableContainer");
+      if (!data.length) {
+        container.innerHTML = "<p>No users found.</p>";
+        return;
+      }
+      let html = `
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Role</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+      `;
+      data.forEach(u => {
+        html += `
+          <tr>
+            <td>${u.name || '-'}</td>
+            <td>${u.email || '-'}</td>
+            <td>${u.role || '-'}</td>
+            <td>
+              <button class="btn btn-primary btn-sm me-1" onclick="editUser('${u.id}')">Edit</button>
+              <button class="btn btn-danger btn-sm" onclick="deleteUser('${u.id}')">Delete</button>
+            </td>
+          </tr>
+        `;
+      });
+      html += "</tbody></table>";
+      container.innerHTML = html;
+    }
+    
+    /***** Global Action Functions for Bookings *****/
+    window.editBooking = async function(id) {
+      const newStatus = prompt("Enter new status for booking:");
+      if (newStatus) {
+        try {
+          const docRef = doc(db, "bookings", id);
+          await updateDoc(docRef, { status: newStatus });
+          alert("Booking updated.");
+          fetchBookings();
+        } catch (err) {
+          console.error("Error updating booking:", err);
+        }
+      }
+    };
+    
+    window.deleteBooking = async function(id) {
+      if (confirm("Delete this booking?")) {
+        try {
+          const docRef = doc(db, "bookings", id);
+          await deleteDoc(docRef);
+          alert("Booking deleted.");
+          fetchBookings();
+        } catch (err) {
+          console.error("Error deleting booking:", err);
+        }
+      }
+    };
+    
+    window.rescheduleBooking = async function(id) {
+      const newDate = prompt("Enter new travel date (YYYY-MM-DD):");
+      if (newDate) {
+        try {
+          const docRef = doc(db, "bookings", id);
+          await updateDoc(docRef, { travelDate: newDate });
+          alert("Booking rescheduled.");
+          fetchBookings();
+        } catch (err) {
+          console.error("Error rescheduling booking:", err);
+        }
+      }
+    };
+    
+    window.cancelBooking = async function(id) {
+      if (confirm("Cancel this booking?")) {
+        try {
+          const docRef = doc(db, "bookings", id);
+          await updateDoc(docRef, { status: "cancelled" });
+          alert("Booking cancelled.");
+          fetchBookings();
+        } catch (err) {
+          console.error("Error cancelling booking:", err);
+        }
+      }
+    };
+    
+    window.viewPassengerDetails = function(details) {
+      let text = "Passenger Details:\n";
+      details.forEach((p, i) => {
+        text += `\nPassenger ${i + 1}:\nName: ${p.firstName || '-'} ${p.lastName || '-'}\nAge: ${p.age || '-'}\nEmail: ${p.email || '-'}\n`;
+      });
+      alert(text);
+    };
+    
+    /***** Global Action Functions for Users *****/
+    window.editUser = async function(id) {
+      const newRole = prompt("Enter new role for user:");
+      if (newRole) {
+        try {
+          const userRef = doc(db, "users", id);
+          await updateDoc(userRef, { role: newRole });
+          alert("User updated.");
+          fetchUsers();
+        } catch (err) {
+          console.error("Error updating user:", err);
+        }
+      }
+    };
+    
+    window.deleteUser = async function(id) {
+      if (confirm("Delete this user?")) {
+        try {
+          const userRef = doc(db, "users", id);
+          await deleteDoc(userRef);
+          alert("User deleted.");
+          fetchUsers();
+        } catch (err) {
+          console.error("Error deleting user:", err);
+        }
+      }
+    };
+
+    // New Add User functionality
+    document.getElementById("addUserBtn").addEventListener("click", async () => {
+      const name = prompt("Enter user's name:");
+      const email = prompt("Enter user's email:");
+      const role = prompt("Enter user's role:");
+      if (name && email && role) {
+        try {
+          await addDoc(collection(db, "users"), { name, email, role });
+          alert("User added successfully.");
+          fetchUsers();
+        } catch (err) {
+          console.error("Error adding user:", err);
+        }
+      }
+    });
+    
+    /***** Fetch Functions *****/
+    async function fetchBookings() {
+      try {
+        const querySnapshot = await getDocs(collection(db, "bookings"));
+        currentBookings = querySnapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() }));
+        updateDashboardMetrics(currentBookings);
+        // Render bookings table with search filter applied
+        const q = document.getElementById("bookingsSearchInput").value;
+        const filtered = q ? filterBookings(currentBookings, q) : currentBookings;
+        renderBookingsTable(filtered);
+        
+        // Update Revenue Chart (by month)
+        let monthlyRevenue = new Array(12).fill(0);
+        // For travellers per month chart
+        let monthlyTravellerCount = new Array(12).fill(0);
+        currentBookings.forEach(b => {
+          let rawPrice = (b.totalPrice || "").toString();
+          let price = parseFloat(rawPrice.replace(/[^0-9.]/g, "")) || 0;
+          if (b.travelDate) {
+            const month = parseInt(b.travelDate.substring(5, 7));
+            if (!isNaN(month)) {
+              monthlyRevenue[month - 1] += price;
+              // Count passengers if available
+              let count = (b.passengerDetails && Array.isArray(b.passengerDetails)) ? b.passengerDetails.length : 0;
+              monthlyTravellerCount[month - 1] += count;
+            }
+          }
+        });
+        if (revenueChart) {
+          revenueChart.data.datasets[0].data = monthlyRevenue;
+          revenueChart.update();
+        }
+        // Update Travel Trends Chart (by destination)
+        let destCount = {};
+        currentBookings.forEach(b => {
+          const dest = b.destination ? b.destination.trim() : null;
+          if (dest) {
+            destCount[dest] = (destCount[dest] || 0) + 1;
+          }
+        });
+        const labels = Object.keys(destCount);
+        const data = labels.map(l => destCount[l]);
+        if (travelChart) {
+          travelChart.data.labels = labels;
+          travelChart.data.datasets[0].data = data;
+          travelChart.update();
+        }
+        
+        // ----- New Travel Analytics Updates -----
+        // Aggregate travel classes for detailedTravelChart (assumes booking has a travelClass field)
+        let classCount = {};
+        // Collect passenger counts for each booking
+        let passengerCounts = [];
+        currentBookings.forEach(b => {
+          let tClass = b.travelClass || "Unknown";
+          classCount[tClass] = (classCount[tClass] || 0) + 1;
+          let count = (b.passengerDetails && Array.isArray(b.passengerDetails)) ? b.passengerDetails.length : 0;
+          passengerCounts.push({ id: b.id, count: count });
+        });
+        // Update detailedTravelChart for Travel Class Preferences
+        if (detailedTravelChart) {
+          let classLabels = Object.keys(classCount);
+          let classData = classLabels.map(label => classCount[label]);
+          detailedTravelChart.data.labels = classLabels;
+          detailedTravelChart.data.datasets[0].data = classData;
+          detailedTravelChart.update();
+        }
+        // Create/Update Passenger Count Chart
+        const passengerCountCanvas = document.getElementById("passengerCountChart");
+        if (passengerCountCanvas) {
+          let labels = passengerCounts.map(item => item.id.substring(0, 5)); // shortened id for display
+          let data = passengerCounts.map(item => item.count);
+          if (window.passengerCountChart) {
+            window.passengerCountChart.data.labels = labels;
+            window.passengerCountChart.data.datasets[0].data = data;
+            window.passengerCountChart.update();
+          } else {
+            const ctxPass = passengerCountCanvas.getContext("2d");
+            window.passengerCountChart = new Chart(ctxPass, {
+              type: "bar",
+              data: {
+                labels: labels,
+                datasets: [{
+                  label: "Passenger Count per Booking",
+                  data: data,
+                  backgroundColor: "rgba(255, 99, 132, 0.5)",
+                  borderColor: "rgba(255, 99, 132, 1)",
+                  borderWidth: 2
+                }]
+              },
+              options: { responsive: true, scales: { y: { beginAtZero: true } } }
+            });
+          }
+        }
+        
+        // Update or create Traveller per Month Chart
+        const travellerCanvas = document.getElementById("travellersPerMonthChart");
+        if (travellerCanvas) {
+          const monthLabels = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+          if (travellerPerMonthChart) {
+            travellerPerMonthChart.data.datasets[0].data = monthlyTravellerCount;
+            travellerPerMonthChart.update();
+          } else {
+            const ctxTrav = travellerCanvas.getContext("2d");
+            travellerPerMonthChart = new Chart(ctxTrav, {
+              type: "line",
+              data: {
+                labels: monthLabels,
+                datasets: [{
+                  label: "Total Travellers per Month",
+                  data: monthlyTravellerCount,
+                  backgroundColor: "rgba(54, 162, 235, 0.5)",
+                  borderColor: "rgba(54, 162, 235, 1)",
+                  borderWidth: 2,
+                  tension: 0.3,
+                  fill: true
+                }]
+              },
+              options: { responsive: true, scales: { y: { beginAtZero: true } } }
+            });
+          }
+        }
+        
+        // ----- New Revenue Analytics Update (Revenue by Dep-Dest Combination) -----
+        // Aggregate revenue by departure-destination combination
+        let depDestRevenue = {};
+        const reportData = currentBookings.filter(b => b.travelDate); // using travelDate as criteria
+        reportData.forEach(b => {
+          const dep = b.departure || "Unknown";
+          const dest = b.destination || "Unknown";
+          const key = `${dep} - ${dest}`;
+          let rawPrice = (b.totalPrice || "").toString();
+          let price = parseFloat(rawPrice.replace(/[^0-9.]/g, "")) || 0;
+          depDestRevenue[key] = (depDestRevenue[key] || 0) + price;
+        });
+        const ddLabels = Object.keys(depDestRevenue);
+        const ddData = ddLabels.map(label => depDestRevenue[label]);
+        const ddCanvas = document.getElementById("revenueDepDestChart");
+        if (ddCanvas) {
+          if (window.revenueDepDestChart) {
+            window.revenueDepDestChart.data.labels = ddLabels;
+            window.revenueDepDestChart.data.datasets[0].data = ddData;
+            window.revenueDepDestChart.update();
+          } else {
+            const ctxDD = ddCanvas.getContext("2d");
+            window.revenueDepDestChart = new Chart(ctxDD, {
+              type: "bar",
+              data: {
+                labels: ddLabels,
+                datasets: [{
+                  label: "Revenue (Ksh)",
+                  data: ddData,
+                  backgroundColor: "rgba(255, 206, 86, 0.5)",
+                  borderColor: "rgba(255, 206, 86, 1)",
+                  borderWidth: 2
+                }]
+              },
+              options: { responsive: true, scales: { y: { beginAtZero: true } } }
+            });
+          }
+        }
+      } catch (err) {
+        console.error("Error fetching bookings:", err);
+      }
+    }
+    
+    async function fetchUsers() {
+      try {
+        const querySnapshot = await getDocs(collection(db, "users"));
+        currentUsers = querySnapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() }));
+        const q = document.getElementById("usersSearchInput").value;
+        const filtered = q ? filterUsers(currentUsers, q) : currentUsers;
+        renderUsersTable(filtered);
+      } catch (err) {
+        console.error("Error fetching users:", err);
+      }
+    }
+    
+    /***** Chart Initialization *****/
+    // Revenue Trends Chart (line, 12 months)
+    const revenueChartElem = document.getElementById("revenueChart");
+    if (revenueChartElem) {
+      const ctx = revenueChartElem.getContext("2d");
+      revenueChart = new Chart(ctx, {
+        type: "line",
+        data: {
+          labels: ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"],
+          datasets: [{
+            label: "Revenue (Ksh)",
+            data: new Array(12).fill(0),
+            backgroundColor: "rgba(255, 165, 0, 0.5)",
+            borderColor: "rgba(255, 165, 0,1)",
+            borderWidth: 2,
+            tension: 0.3,
+            fill: true
+          }]
+        },
+        options: { responsive: true, scales: { y: { beginAtZero: true } } }
+      });
+    }
+    
+    // Travel Trends Chart (bar, dynamic destinations)
+    const travelChartElem = document.getElementById("travelChart");
+    if (travelChartElem) {
+      const ctx = travelChartElem.getContext("2d");
+      travelChart = new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels: [],
+          datasets: [{
+            label: "Bookings per City",
+            data: [],
+            backgroundColor: "rgba(0, 123, 255, 0.5)",
+            borderColor: "rgba(0, 123, 255,1)",
+            borderWidth: 2
+          }]
+        },
+        options: { responsive: true, scales: { y: { beginAtZero: true } } }
+      });
+    }
+    
+    // Detailed Travel Analytics Chart – for Travel Class Preferences
+    const detailedTravelChartElem = document.getElementById("detailedTravelChart");
+    if (detailedTravelChartElem) {
+      const ctx = detailedTravelChartElem.getContext("2d");
+      detailedTravelChart = new Chart(ctx, {
+        type: "doughnut",
+        data: {
+          labels: [],
+          datasets: [{
+            label: "Class Preferences",
+            data: [],
+            backgroundColor: ["#007BFF", "#28a745", "#dc3545"],
+          }]
+        },
+        options: { responsive: true }
+      });
+    }
+    
+    /***** Revenue Analytics Report (dummy integration) ******/
+    document.getElementById("filterRevenueBtn").addEventListener("click", () => {
+      // For demonstration, filter currentBookings by date range and min revenue
+      const from = document.getElementById("revenueDateFrom").value;
+      const to = document.getElementById("revenueDateTo").value;
+      const min = parseFloat(document.getElementById("minRevenue").value) || 0;
+      let reportData = currentBookings.filter(b => {
+        if (!b.travelDate) return false;
+        if (from && b.travelDate < from) return false;
+        if (to && b.travelDate > to) return false;
+        let rawPrice = (b.totalPrice || "").toString();
+        let price = parseFloat(rawPrice.replace(/[^0-9.]/g, "")) || 0;
+        return price >= min;
+      });
+      
+      // Calculate total revenue for the period
+      let totalRevenue = reportData.reduce((sum, b) => {
+        let rawPrice = (b.totalPrice || "").toString();
+        let price = parseFloat(rawPrice.replace(/[^0-9.]/g, "")) || 0;
+        return sum + price;
+      }, 0);
+      
+      // Display total revenue
+      document.getElementById("totalRevenueDisplay").innerHTML = `<h5>Total Revenue: Ksh ${totalRevenue.toLocaleString()}</h5>`;
+      
+      // Render revenue table (as before)
+      let html = `<table class="table table-striped">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Destination</th>
+            <th>Total Price</th>
+          </tr>
+        </thead>
+        <tbody>`;
+      reportData.forEach(b => {
+        html += `<tr>
+          <td>${b.travelDate || '-'}</td>
+          <td>${b.destination || '-'}</td>
+          <td>${b.totalPrice || '-'}</td>
+        </tr>`;
+      });
+      html += `</tbody></table>`;
+      document.getElementById("revenueReportContainer").innerHTML = html;
+      
+      // Aggregate revenue by departure
+      let departureRevenue = {};
+      reportData.forEach(b => {
+        let dep = b.departure || "Unknown";
+        let rawPrice = (b.totalPrice || "").toString();
+        let price = parseFloat(rawPrice.replace(/[^0-9.]/g, "")) || 0;
+        departureRevenue[dep] = (departureRevenue[dep] || 0) + price;
+      });
+      
+      // Aggregate revenue by destination
+      let destinationRevenue = {};
+      reportData.forEach(b => {
+        let dest = b.destination || "Unknown";
+        let rawPrice = (b.totalPrice || "").toString();
+        let price = parseFloat(rawPrice.replace(/[^0-9.]/g, "")) || 0;
+        destinationRevenue[dest] = (destinationRevenue[dest] || 0) + price;
+      });
+      
+      // Update or create Revenue by Departure Chart
+      const depCanvas = document.getElementById("revenueDepartureChart");
+      if (depCanvas) {
+        const depLabels = Object.keys(departureRevenue);
+        const depData = depLabels.map(label => departureRevenue[label]);
+        if (window.revenueDepartureChart) {
+          window.revenueDepartureChart.data.labels = depLabels;
+          window.revenueDepartureChart.data.datasets[0].data = depData;
+          window.revenueDepartureChart.update();
+        } else {
+          const ctxDep = depCanvas.getContext("2d");
+          window.revenueDepartureChart = new Chart(ctxDep, {
+            type: "bar",
+            data: {
+              labels: depLabels,
+              datasets: [{
+                label: "Revenue by Departure (Ksh)",
+                data: depData,
+                backgroundColor: "rgba(75,192,192,0.5)",
+                borderColor: "rgba(75,192,192,1)",
+                borderWidth: 2
+              }]
+            },
+            options: { responsive: true, scales: { y: { beginAtZero: true } } }
+          });
+        }
+      }
+      
+      // Update or create Revenue by Destination Chart
+      const destCanvas = document.getElementById("revenueDestinationChart");
+      if (destCanvas) {
+        const destLabels = Object.keys(destinationRevenue);
+        const destData = destLabels.map(label => destinationRevenue[label]);
+        if (window.revenueDestinationChart) {
+          window.revenueDestinationChart.data.labels = destLabels;
+          window.revenueDestinationChart.data.datasets[0].data = destData;
+          window.revenueDestinationChart.update();
+        } else {
+          const ctxDest = destCanvas.getContext("2d");
+          window.revenueDestinationChart = new Chart(ctxDest, {
+            type: "bar",
+            data: {
+              labels: destLabels,
+              datasets: [{
+                label: "Revenue by Destination (Ksh)",
+                data: destData,
+                backgroundColor: "rgba(153,102,255,0.5)",
+                borderColor: "rgba(153,102,255,1)",
+                borderWidth: 2
+              }]
+            },
+            options: { responsive: true, scales: { y: { beginAtZero: true } } }
+          });
+        }
+      }
+      
+      // Revenue by Departure-Destination Combination updated in fetchBookings() below
+    });
+    
+    /***** Reports Section (dummy integration) *****/
+    document.getElementById("generateReportBtn").addEventListener("click", () => {
+      const from = document.getElementById("reportDateFrom").value;
+      const to = document.getElementById("reportDateTo").value;
+      // For demo, filter bookings by report date (using travelDate)
+      let reportData = currentBookings.filter(b => {
+        if (!b.travelDate) return false;
+        if (from && b.travelDate < from) return false;
+        if (to && b.travelDate > to) return false;
+        return true;
+      });
+      let html = `<h5>Report (Bookings from ${from || "Any"} to ${to || "Any"})</h5>
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Departure</th>
+              <th>Destination</th>
+              <th>Total Price</th>
+            </tr>
+          </thead>
+          <tbody>`;
+      reportData.forEach(b => {
+        html += `<tr>
+          <td>${b.travelDate || '-'}</td>
+          <td>${b.departure || '-'}</td>
+          <td>${b.destination || '-'}</td>
+          <td>${b.totalPrice || '-'}</td>
+        </tr>`;
+      });
+      html += `</tbody></table>`;
+      document.getElementById("reportContainer").innerHTML = html;
+    });
+    
+    /***** Settings Form *****/
+    document.getElementById("settingsForm").addEventListener("submit", (e) => {
+      e.preventDefault();
+      alert("Settings saved.");
+      // In production, these settings would be saved to Firestore or another configuration system.
+    });
+    
+    /***** Sidebar Navigation Setup *****/
+    const sections = {
+      dashboard: document.getElementById("dashboardSection"),
+      bookings: document.getElementById("bookingsSection"),
+      users: document.getElementById("usersSection"),
+      revenue: document.getElementById("revenueSection"),
+      travel: document.getElementById("travelLink"),  // travel analytics section
+      travelAnalytics: document.getElementById("travelAnalyticsSection"),
+      reports: document.getElementById("reportsSection"),
+      settings: document.getElementById("settingsSection")
+    };
+    
+    function hideAllSections() {
+      document.querySelectorAll("main > div").forEach(sec => sec.classList.add("hidden"));
+      document.querySelectorAll(".sidebar a").forEach(link => link.classList.remove("active"));
+    }
+    
+    document.getElementById("dashboardLink").addEventListener("click", () => {
+      hideAllSections();
+      document.getElementById("dashboardSection").classList.remove("hidden");
+      document.getElementById("dashboardLink").classList.add("active");
+    });
+    document.getElementById("bookingsLink").addEventListener("click", () => {
+      hideAllSections();
+      document.getElementById("bookingsSection").classList.remove("hidden");
+      document.getElementById("bookingsLink").classList.add("active");
+      fetchBookings();
+    });
+    document.getElementById("usersLink").addEventListener("click", () => {
+      hideAllSections();
+      document.getElementById("usersSection").classList.remove("hidden");
+      document.getElementById("usersLink").classList.add("active");
+      fetchUsers();
+    });
+    document.getElementById("revenueLink").addEventListener("click", () => {
+      hideAllSections();
+      document.getElementById("revenueSection").classList.remove("hidden");
+      document.getElementById("revenueLink").classList.add("active");
+    });
+    document.getElementById("travelLink").addEventListener("click", () => {
+      hideAllSections();
+      document.getElementById("travelAnalyticsSection").classList.remove("hidden");
+      document.getElementById("travelLink").classList.add("active");
+    });
+    document.getElementById("reportsLink").addEventListener("click", () => {
+      hideAllSections();
+      document.getElementById("reportsSection").classList.remove("hidden");
+      document.getElementById("reportsLink").classList.add("active");
+    });
+    document.getElementById("settingsLink").addEventListener("click", () => {
+      hideAllSections();
+      document.getElementById("settingsSection").classList.remove("hidden");
+      document.getElementById("settingsLink").classList.add("active");
+    });
+    
+    // On load, show Dashboard and fetch initial data
+    hideAllSections();
+    document.getElementById("dashboardSection").classList.remove("hidden");
+    document.getElementById("dashboardLink").classList.add("active");
+    fetchBookings();
+    fetchUsers();
+  </script>
+  <!-- Bootstrap Bundle JS (includes Popper) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

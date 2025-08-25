@@ -1,0 +1,123 @@
+
+body {
+    position: relative;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+   
+}
+
+.bg-orange {
+    background-color: orange;
+}
+
+.text-orange {
+    color: orange;
+}
+
+.btn-orange {
+    background-color: orange;
+    color: white;
+    font-size: 16px;
+}
+.navbar {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 1000;
+    background-color: orange;
+    font-weight: bold;
+}
+
+.btn{
+    align-self: center;
+    /* padding: 10px 25px; */
+    border-radius: 12px;
+    outline: 0;
+    border: 0;
+    background: white;
+    color:orange;
+    font-size: 16px;
+    box-shadow: 0 0 15px #33ff5850;
+    transition: 0.3s ease-in-out;
+}
+button:hover {
+box-shadow: 
+0px 0px 10px #33ff57,
+0px 0px 40px #33ff57,
+0px 0px 60px #33ff57;
+}
+
+.navbar-brand img {
+    height: 40px;
+    transition: transform 0.3s ease, opacity 0.3s ease; /* Smooth effect */
+}
+
+.navbar-brand img:hover {
+    transform: scale(1.2); /* Enlarges slightly */
+    opacity: 0.8; /* Fades out slightly */
+}
+.navbar-nav .nav-link {
+    position: relative;
+    transition: color 0.3s ease-in-out;
+    color: black;
+}
+
+.navbar-nav .nav-link.active {
+    color: white;
+}
+
+.navbar-nav .nav-link.active::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -4px;
+    width: 100%;
+    height: 3px;
+    background-color: blue; /* Updated underline color */
+}
+span{
+    transition: all 0.5s ease; 
+    height: 40px;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    font-weight: bold;
+}
+span:hover{
+    transform: scale(1.6);
+    transition: color 0.3s ease-in-out;
+    opacity:0.8;
+}
+.footer {
+    background: magenta;
+    color: white;
+    padding: 15px;
+    position: relative;
+    bottom: 0;
+    width: 100%;
+    text-align: center;
+    font-weight: bold;
+}
+
+#contact {
+  margin-left: -7px; 
+}
+/* admin */
+/* Navbar link colors */
+.navbar-dark .navbar-nav .nav-link {
+    color: white;
+}
+.navbar-dark .navbar-nav .nav-link:hover {
+    color: orange;
+}
+
+/* Custom style for the Admin button if desired */
+.btn-warning {
+    /* You can adjust padding, font-size, etc. here */
+}
+
+/* Modal header style */
+.modal-header {
+    background-color: #FFA500;  /* Orange color */
+    color: white;
+}
+

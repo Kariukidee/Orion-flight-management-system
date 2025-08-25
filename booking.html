@@ -1,0 +1,693 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Booking Summary</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+  <style>
+    body { padding: 20px; }
+    .container { max-width: 1000px; margin: auto; }
+    .mb-3 { margin-bottom: 1rem; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h3>Booking Summary</h3>
+    <div id="summaryDetails"></div>
+    <hr>
+    <h4>Passenger Details</h4>
+    <form id="passengerDetailsForm">
+      <div class="row" id="passengerDetailsContainer">
+        - Passenger forms will be dynamically generated here --
+      </div>
+      <hr>
+      <h4>Payment Section</h4>
+      <div id="paymentSection">
+        <label>
+          <input type="radio" name="paymentMethod" value="mobile_money" required> Mobile Money
+        </label>
+        <label>
+          <input type="radio" name="paymentMethod" value="credit_card" required> Credit Card
+        </label>
+        <label>
+          <input type="radio" name="paymentMethod" value="bank_transfer" required> Bank Transfer
+        </label>
+      </div>
+      <div id="paymentDetails" style="display: none; margin-top: 15px;"></div>
+      <br>
+      <button type="submit" class="btn btn-orange">Submit Booking</button>
+    </form>
+  </div>
+
+  <button id="prevButton" class="btn btn-secondary">Previous</button>
+
+  <script>
+    // Retrieve bookingData from local storage
+    const bookingData = JSON.parse(localStorage.getItem("bookingData")) || {};
+
+    // Build the summary details
+    let summaryHTML = `
+      <p><strong>From:</strong> ${bookingData.departure}</p>
+      <p><strong>To:</strong> ${bookingData.destination}</p>
+      <p><strong>Travel Date:</strong> ${bookingData.travelDate}</p>`;
+    
+    if(bookingData.flightType === "round-trip"){
+      summaryHTML += `<p><strong>Return Date:</strong> ${bookingData.returnDate}</p>`;
+    }
+    summaryHTML += `
+      <p><strong>Flight Class:</strong> ${bookingData.flightClass}</p>
+      <p><strong>Flight Type:</strong> ${bookingData.flightType}</p>
+      <p><strong>No. of Passengers:</strong> ${bookingData.passengerCount}</p>
+      <p><strong>Total Price:</strong> ${bookingData.totalPrice}</p>
+      <p><strong>Flight Reference Code:</strong> ${bookingData.flightReference}</p>`;
+    
+    document.getElementById("summaryDetails").innerHTML = summaryHTML;
+
+    // Dynamically generate passenger detail forms (2 per row)
+    const container = document.getElementById("passengerDetailsContainer");
+    for(let i = 1; i <= bookingData.passengerCount; i++){
+      const colDiv = document.createElement("div");
+      colDiv.classList.add("col-md-6", "mb-3");
+      colDiv.innerHTML = `
+        <h5>Passenger ${i}</h5>
+        <div class="form-group">
+          <label>First Name</label>
+          <input type="text" class="form-control" name="firstName${i}" required>
+        </div>
+        <div class="form-group">
+          <label>Last Name</label>
+          <input type="text" class="form-control" name="lastName${i}" required>
+        </div>
+        <div class="form-group">
+          <label>Age</label>
+          <input type="number" class="form-control" name="age${i}" required>
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" class="form-control" name="email${i}" required>
+        </div>
+        <div class="form-group">
+          <label>Address</label>
+          <input type="text" class="form-control" name="address${i}" required>
+        </div>
+        <div class="form-group">
+          <label>Contact</label>
+          <input type="text" class="form-control" name="contact${i}" required>
+        </div>
+      `;
+      container.appendChild(colDiv);
+    }
+
+    // Show dynamic payment fields based on selection
+    document.addEventListener("DOMContentLoaded", function(){
+      const paymentMethods = document.getElementsByName("paymentMethod");
+      const paymentDetailsDiv = document.getElementById("paymentDetails");
+      for(const method of paymentMethods){
+        method.addEventListener("change", function(){
+          const selected = this.value;
+          if(selected === "credit_card"){
+            paymentDetailsDiv.innerHTML = `
+              <div class="mb-3">
+                <label>Card Number</label>
+                <input type="text" class="form-control" name="cardNumber" required>
+              </div>
+              <div class="mb-3">
+                <label>Expiry Date</label>
+                <input type="text" class="form-control" placeholder="MM/YY" name="expiryDate" required>
+              </div>
+              <div class="mb-3">
+                <label>CVV</label>
+                <input type="text" class="form-control" name="cvv" required>
+              </div>
+            `;
+            paymentDetailsDiv.style.display = "block";
+          } else if(selected === "mobile_money"){
+            paymentDetailsDiv.innerHTML = `
+              <div class="mb-3">
+                <label>Mobile Money Number</label>
+                <input type="text" class="form-control" name="mobileMoneyNumber" required>
+              </div>
+            `;
+            paymentDetailsDiv.style.display = "block";
+          } else if(selected === "bank_transfer"){
+            paymentDetailsDiv.innerHTML = `
+              <div class="mb-3">
+                <label>Bank Account Number</label>
+                <input type="text" class="form-control" name="bankAccount" required>
+              </div>
+            `;
+            paymentDetailsDiv.style.display = "block";
+          }
+        });
+      }
+    });
+
+    // (Optional) Handle the final form submission here.
+    document.getElementById("passengerDetailsForm").addEventListener("submit", function(e){
+      e.preventDefault();
+      alert("Final booking submitted! (Integrate with backend at this stage.)");
+    });
+
+    document.getElementById("prevButton").addEventListener("click", function(){
+    // Attempt to close the current tab (works if the tab was opened via script)
+    window.close();
+  });
+  </script>
+</body>
+</html> -->
+
+
+
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Booking Summary</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+  <style>
+    body { padding: 20px; }
+    .container { max-width: 1000px; margin: auto; }
+    .mb-3 { margin-bottom: 1rem; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h3>Booking Summary</h3>
+    <div id="summaryDetails"></div>
+    <hr>
+    <h4>Passenger Details</h4>
+    <form id="passengerDetailsForm">
+      <div class="row" id="passengerDetailsContainer">
+  <!-- Passenger forms will be dynamically generated here   --
+      </div>
+      <hr>
+      <h4>Payment Section</h4>
+      <div id="paymentSection">
+        <label>
+          <input type="radio" name="paymentMethod" value="mobile_money" required> Mobile Money
+        </label>
+        <label>
+          <input type="radio" name="paymentMethod" value="credit_card" required> Credit Card
+        </label>
+        <label>
+          <input type="radio" name="paymentMethod" value="bank_transfer" required> Bank Transfer
+        </label>
+      </div>
+      <div id="paymentDetails" style="display: none; margin-top: 15px;"></div>
+      <br>
+      <button type="submit" class="btn btn-orange">Submit Booking</button>
+    </form>
+  </div>
+
+  <button id="prevButton" class="btn btn-secondary">Previous</button>
+
+    <!-- Make this script a module so we can use Firebase imports   --
+  <script type="module">
+    // ----- Firebase Setup -----
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+
+    // Your Firebase configuration object (update if needed)
+    const firebaseConfig = {
+      apiKey: "AIzaSyDB6zVp5bJtqrNVMDX-wS7plX2RDDS80y4",
+      authDomain: "orion-flights.firebaseapp.com",
+      projectId: "orion-flights",
+      storageBucket: "orion-flights.appspot.com",
+      messagingSenderId: "679154147535",
+      appId: "1:679154147535:web:5771584a3cc7cf143517ba"
+    };
+
+    // Initialize Firebase and Firestore
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // ----- Existing Booking Summary & Passenger Form Code -----
+    // Retrieve bookingData from local storage
+    const bookingData = JSON.parse(localStorage.getItem("bookingData")) || {};
+
+    // Build the summary details HTML
+    let summaryHTML = `
+      <p><strong>From:</strong> ${bookingData.departure}</p>
+      <p><strong>To:</strong> ${bookingData.destination}</p>
+      <p><strong>Travel Date:</strong> ${bookingData.travelDate}</p>
+    `;
+    if (bookingData.flightType === "round-trip"){
+      summaryHTML += `<p><strong>Return Date:</strong> ${bookingData.returnDate}</p>`;
+    }
+    summaryHTML += `
+      <p><strong>Flight Class:</strong> ${bookingData.flightClass}</p>
+      <p><strong>Flight Type:</strong> ${bookingData.flightType}</p>
+      <p><strong>No. of Passengers:</strong> ${bookingData.passengerCount}</p>
+      <p><strong>Total Price:</strong> ${bookingData.totalPrice}</p>
+      <p><strong>Flight Reference Code:</strong> ${bookingData.flightReference}</p>
+    `;
+    document.getElementById("summaryDetails").innerHTML = summaryHTML;
+
+    // Dynamically generate passenger detail forms based on number of passengers
+    const container = document.getElementById("passengerDetailsContainer");
+    for (let i = 1; i <= bookingData.passengerCount; i++){
+      const colDiv = document.createElement("div");
+      colDiv.classList.add("col-md-6", "mb-3");
+      colDiv.innerHTML = `
+        <h5>Passenger ${i}</h5>
+        <div class="form-group">
+          <label>First Name</label>
+          <input type="text" class="form-control" name="firstName${i}" required>
+        </div>
+        <div class="form-group">
+          <label>Last Name</label>
+          <input type="text" class="form-control" name="lastName${i}" required>
+        </div>
+        <div class="form-group">
+          <label>Age</label>
+          <input type="number" class="form-control" name="age${i}" required>
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" class="form-control" name="email${i}" required>
+        </div>
+        <div class="form-group">
+          <label>Address</label>
+          <input type="text" class="form-control" name="address${i}" required>
+        </div>
+        <div class="form-group">
+          <label>Contact</label>
+          <input type="text" class="form-control" name="contact${i}" required>
+        </div>
+      `;
+      container.appendChild(colDiv);
+    }
+
+    // Show dynamic payment fields based on the selected payment method
+    document.addEventListener("DOMContentLoaded", function(){
+      const paymentMethods = document.getElementsByName("paymentMethod");
+      const paymentDetailsDiv = document.getElementById("paymentDetails");
+      for (const method of paymentMethods){
+        method.addEventListener("change", function(){
+          const selected = this.value;
+          if (selected === "credit_card"){
+            paymentDetailsDiv.innerHTML = `
+              <div class="mb-3">
+                <label>Card Number</label>
+                <input type="text" class="form-control" name="cardNumber" required>
+              </div>
+              <div class="mb-3">
+                <label>Expiry Date</label>
+                <input type="text" class="form-control" placeholder="MM/YY" name="expiryDate" required>
+              </div>
+              <div class="mb-3">
+                <label>CVV</label>
+                <input type="text" class="form-control" name="cvv" required>
+              </div>
+            `;
+            paymentDetailsDiv.style.display = "block";
+          } else if (selected === "mobile_money"){
+            paymentDetailsDiv.innerHTML = `
+              <div class="mb-3">
+                <label>Mobile Money Number</label>
+                <input type="text" class="form-control" name="mobileMoneyNumber" required>
+              </div>
+            `;
+            paymentDetailsDiv.style.display = "block";
+          } else if (selected === "bank_transfer"){
+            paymentDetailsDiv.innerHTML = `
+              <div class="mb-3">
+                <label>Bank Account Number</label>
+                <input type="text" class="form-control" name="bankAccount" required>
+              </div>
+            `;
+            paymentDetailsDiv.style.display = "block";
+          }
+        });
+      }
+    });
+
+    // ----- Helper function to extract passenger details -----
+    function extractPassengerDetails() {
+      const passengerCards = document.querySelectorAll("#passengerDetailsContainer .col-md-6");
+      let passengerData = [];
+      passengerCards.forEach(card => {
+        const passenger = {
+          firstName: card.querySelector('input[name^="firstName"]').value,
+          lastName: card.querySelector('input[name^="lastName"]').value,
+          age: card.querySelector('input[name^="age"]').value,
+          email: card.querySelector('input[name^="email"]').value,
+          address: card.querySelector('input[name^="address"]').value,
+          contact: card.querySelector('input[name^="contact"]').value
+        };
+        passengerData.push(passenger);
+      });
+      return passengerData;
+    }
+
+    // ----- Final Form Submission: Execute Firebase code only on Submit Booking -----
+    document.getElementById("passengerDetailsForm").addEventListener("submit", async function(e){
+      e.preventDefault();  // Prevent default form submission
+
+      // Extract passenger details from the form
+      const passengerDetails = extractPassengerDetails();
+      // Get the selected payment method
+      const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
+      
+      // Build the payload to store in Firestore
+      const bookingPayload = {
+        bookingData,               // Data from local storage (flight details, etc.)
+        passengerDetails,          // Array of all passenger info from the form
+        paymentMethod,             // Payment method selected
+        timestamp: new Date().toISOString()  // Record submission time
+      };
+
+      try {
+        // Add the booking document into the "bookings" collection in Firestore
+        await addDoc(collection(db, "bookings"), bookingPayload);
+        alert("Booking submitted successfully!");
+        // Optionally, clear local storage or redirect the user after submission
+      } catch (error) {
+        console.error("Error submitting booking:", error);
+        alert("There was an error submitting your booking. Please try again.");
+      }
+    });
+
+    // ----- Previous Button Functionality -----
+    document.getElementById("prevButton").addEventListener("click", function(){
+      // Attempt to close the current tab (works if opened via script)
+      window.close();
+    });
+  </script>
+</body>
+</html>   -->
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Booking Summary</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+  <!-- jsPDF library for PDF export -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    body { padding: 20px; }
+    .container { max-width: 1000px; margin: auto; }
+    .mb-3 { margin-bottom: 1rem; }
+    /* Initially, hide the report button */
+    #reportButton { display: none; margin-top: 20px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h3>Booking Summary</h3>
+    <div id="summaryDetails"></div><br>
+    <button id="prevButton" class="btn btn-secondary">Previous</button>
+    <hr>
+
+    <h4>Passenger Details</h4>
+    <form id="passengerDetailsForm">
+      <div class="row" id="passengerDetailsContainer">
+        <!-- Passenger forms are generated dynamically -->
+      </div>
+      <hr>
+      <h4>Payment Section</h4>
+      <div id="paymentSection">
+        <label>
+          <input type="radio" name="paymentMethod" value="mobile_money" required> Mobile Money
+        </label>
+        <label>
+          <input type="radio" name="paymentMethod" value="credit_card" required> Credit Card
+        </label>
+        <label>
+          <input type="radio" name="paymentMethod" value="bank_transfer" required> Bank Transfer
+        </label>
+      </div>
+      <div id="paymentDetails" style="display: none; margin-top: 15px;"></div>
+      <br>
+      <button type="submit" class="btn btn-orange">Submit Booking</button>
+    </form>
+    <br>
+    
+    <button id="reportButton" class="btn btn-primary">Generate Report</button>
+  </div>
+
+  <script type="module">
+    // ----- Firebase Setup -----
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+    import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+
+   const firebaseConfig = {
+      apiKey: "AIzaSyDB6zVp5bJtqrNVMDX-wS7plX2RDDS80y4",
+      authDomain: "orion-flights.firebaseapp.com",
+      projectId: "orion-flights",
+      storageBucket: "orion-flights.appspot.com",
+      messagingSenderId: "679154147535",
+      appId: "1:679154147535:web:5771584a3cc7cf143517ba"
+    };
+
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // Global variable to store the current booking that was submitted.
+    let currentBooking = null;
+
+    // ----- Retrieve bookingData from local storage (unchanged) -----
+    const bookingData = JSON.parse(localStorage.getItem("bookingData")) || {};
+
+    // Build the summary details HTML (unchanged)
+    let summaryHTML = `
+      <p><strong>From:</strong> ${bookingData.departure}</p>
+      <p><strong>To:</strong> ${bookingData.destination}</p>
+      <p><strong>Travel Date:</strong> ${bookingData.travelDate}</p>
+      ${bookingData.flightType === "round-trip" ? `<p><strong>Return Date:</strong> ${bookingData.returnDate}</p>` : ""}
+      <p><strong>Flight Class:</strong> ${bookingData.flightClass}</p>
+      <p><strong>Flight Type:</strong> ${bookingData.flightType}</p>
+      <p><strong>No. of Passengers:</strong> ${bookingData.passengerCount}</p>
+      <p><strong>Total Price:</strong> ${bookingData.totalPrice}</p>
+      <p><strong>Flight Reference Code:</strong> ${bookingData.flightReference}</p>
+    `;
+    document.getElementById("summaryDetails").innerHTML = summaryHTML;
+
+    // ----- Generate Passenger Input Fields (unchanged) -----
+    const container = document.getElementById("passengerDetailsContainer");
+    for (let i = 1; i <= bookingData.passengerCount; i++){
+      const colDiv = document.createElement("div");
+      colDiv.classList.add("col-md-6", "mb-3");
+      colDiv.innerHTML = `
+        <h5>Passenger ${i}</h5>
+        <div class="form-group">
+          <label>First Name</label>
+          <input type="text" class="form-control" name="firstName${i}" required>
+        </div>
+        <div class="form-group">
+          <label>Last Name</label>
+          <input type="text" class="form-control" name="lastName${i}" required>
+        </div>
+        <div class="form-group">
+          <label>Age</label>
+          <input type="number" class="form-control" name="age${i}" required>
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" class="form-control" name="email${i}" required>
+        </div>
+        <div class="form-group">
+          <label>Address</label>
+          <input type="text" class="form-control" name="address${i}" required>
+        </div>
+        <div class="form-group">
+          <label>Contact</label>
+          <input type="text" class="form-control" name="contact${i}" required>
+        </div>
+      `;
+      container.appendChild(colDiv);
+    }
+
+    // ----- Show dynamic payment fields (unchanged) -----
+    document.addEventListener("DOMContentLoaded", function(){
+      const paymentMethods = document.getElementsByName("paymentMethod");
+      const paymentDetailsDiv = document.getElementById("paymentDetails");
+      for (const method of paymentMethods){
+        method.addEventListener("change", function(){
+          const selected = this.value;
+          if (selected === "credit_card"){
+            paymentDetailsDiv.innerHTML = `
+              <div class="mb-3">
+                <label>Card Number</label>
+                <input type="text" class="form-control" name="cardNumber" required>
+              </div>
+              <div class="mb-3">
+                <label>Expiry Date</label>
+                <input type="text" class="form-control" placeholder="MM/YY" name="expiryDate" required>
+              </div>
+              <div class="mb-3">
+                <label>CVV</label>
+                <input type="text" class="form-control" name="cvv" required>
+              </div>
+            `;
+            paymentDetailsDiv.style.display = "block";
+          } else if (selected === "mobile_money"){
+            paymentDetailsDiv.innerHTML = `
+              <div class="mb-3">
+                <label>Mobile Money Number</label>
+                <input type="text" class="form-control" name="mobileMoneyNumber" required>
+              </div>
+            `;
+            paymentDetailsDiv.style.display = "block";
+          } else if (selected === "bank_transfer"){
+            paymentDetailsDiv.innerHTML = `
+              <div class="mb-3">
+                <label>Bank Account Number</label>
+                <input type="text" class="form-control" name="bankAccount" required>
+              </div>
+            `;
+            paymentDetailsDiv.style.display = "block";
+          }
+        });
+      }
+    });
+
+    // ----- Helper function to extract passenger details -----
+    function extractPassengerDetails() {
+      const passengerCards = document.querySelectorAll("#passengerDetailsContainer .col-md-6");
+      let passengerData = [];
+      passengerCards.forEach(card => {
+        const passenger = {
+          firstName: card.querySelector('input[name^="firstName"]').value,
+          lastName: card.querySelector('input[name^="lastName"]').value,
+          age: card.querySelector('input[name^="age"]').value,
+          email: card.querySelector('input[name^="email"]').value,
+          address: card.querySelector('input[name^="address"]').value,
+          contact: card.querySelector('input[name^="contact"]').value
+        };
+        passengerData.push(passenger);
+      });
+      return passengerData;
+    }
+
+    // ----- Submit Booking: Store booking in Firestore and save details locally -----
+    document.getElementById("passengerDetailsForm").addEventListener("submit", async function(e){
+      e.preventDefault();  // Prevent default form submission
+
+      const passengerDetails = extractPassengerDetails();
+      const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
+
+      // Build the payload including both bookingData (from local storage) and new inputs
+      const bookingPayload = {
+        ...bookingData,
+        passengerDetails,
+        paymentMethod,
+        timestamp: new Date().toISOString()
+      };
+
+      try {
+        await addDoc(collection(db, "bookings"), bookingPayload);
+        alert("Booking submitted successfully!");
+        // Save the current booking in a global variable
+        currentBooking = bookingPayload;
+        // Reveal the Report button
+        document.getElementById("reportButton").style.display = "inline-block";
+      } catch (error) {
+        console.error("Error submitting booking:", error);
+        alert("There was an error submitting your booking. Please try again.");
+      }
+    });
+
+    // ----- Generate Report for the Specific Booking -----
+    document.getElementById("reportButton").addEventListener("click", () => {
+      if (!currentBooking) {
+        alert("No booking data available for report.");
+        return;
+      }
+      // Prepare report HTML using the specific booking details with all passenger info
+      let reportHTML = `
+        <h2>Booking Report</h2>
+        <h4>Booking Summary</h4>
+        <p><strong>From:</strong> ${currentBooking.departure}</p>
+        <p><strong>To:</strong> ${currentBooking.destination}</p>
+        <p><strong>Travel Date:</strong> ${currentBooking.travelDate}</p>
+        ${currentBooking.flightType === "round-trip" && currentBooking.returnDate ? `<p><strong>Return Date:</strong> ${currentBooking.returnDate}</p>` : ""}
+        <p><strong>Flight Class:</strong> ${currentBooking.flightClass}</p>
+        <p><strong>Flight Type:</strong> ${currentBooking.flightType}</p>
+        <p><strong>No. of Passengers:</strong> ${currentBooking.passengerCount}</p>
+        <p><strong>Total Price:</strong> ${currentBooking.totalPrice}</p>
+        <p><strong>Reference Code:</strong> ${currentBooking.flightReference}</p>
+        <p><strong>Payment Method:</strong> ${currentBooking.paymentMethod}</p>
+        <hr>
+        <h4>Passenger Details</h4>
+      `;
+      currentBooking.passengerDetails.forEach((passenger, index) => {
+        reportHTML += `
+          <p><strong>Passenger ${index+1}:</strong> ${passenger.firstName} ${passenger.lastName}, Age: ${passenger.age}, Email: ${passenger.email}, Address: ${passenger.address}, Contact: ${passenger.contact}</p>
+        `;
+      });
+      // Open a new window and write the report
+      const reportWindow = window.open("", "_blank");
+      reportWindow.document.write(`
+        <html>
+          <head>
+            <title>Booking Report</title>
+            <style>
+              body { font-family: Arial, sans-serif; padding: 20px; }
+              h2, h4 { color: #2c3e50; }
+              p { margin: 5px 0; }
+              button { padding: 10px; margin: 10px 5px 0 0; cursor: pointer; }
+            </style>
+          </head>
+          <body>
+            ${reportHTML}
+            <button onclick="window.print()">Print Report</button>
+            <button onclick="window.opener.downloadReportPDF()">Download Report</button>
+          </body>
+        </html>
+      `);
+    });
+
+    // ----- Download Report as PDF Function -----
+    // This function is accessible via window.opener from the report window.
+    window.downloadReportPDF = function() {
+      if (!currentBooking) return;
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      let y = 10;
+      doc.text("Booking Report", 10, y);
+      y += 10;
+      doc.text(`From: ${currentBooking.departure}`, 10, y); y += 10;
+      doc.text(`To: ${currentBooking.destination}`, 10, y); y += 10;
+      doc.text(`Travel Date: ${currentBooking.travelDate}`, 10, y); y += 10;
+      if(currentBooking.flightType === "round-trip" && currentBooking.returnDate) {
+        doc.text(`Return Date: ${currentBooking.returnDate}`, 10, y); y += 10;
+      }
+      doc.text(`Flight Class: ${currentBooking.flightClass}`, 10, y); y += 10;
+      doc.text(`Flight Type: ${currentBooking.flightType}`, 10, y); y += 10;
+      doc.text(`No. of Passengers: ${currentBooking.passengerCount}`, 10, y); y += 10;
+      doc.text(`Total Price: ${currentBooking.totalPrice}`, 10, y); y += 10;
+      doc.text(`Reference Code: ${currentBooking.flightReference}`, 10, y); y += 10;
+      doc.text(`Payment Method: ${currentBooking.paymentMethod}`, 10, y); y += 10;
+      y += 10;
+      doc.text("Passenger Details:", 10, y); y += 10;
+      currentBooking.passengerDetails.forEach((passenger, index) => {
+        const line = `Passenger ${index+1}: ${passenger.firstName} ${passenger.lastName}, Age: ${passenger.age}, Email: ${passenger.email}, Address: ${passenger.address}, Contact: ${passenger.contact}`;
+        doc.text(line, 10, y);
+        y += 10;
+      });
+      doc.save("booking_report.pdf");
+    };
+
+    // ----- Previous Button Functionality (unchanged) -----
+    document.getElementById("prevButton").addEventListener("click", function(){
+      window.close();
+    });
+
+    // Load booking summary when the page loads
+    document.addEventListener("DOMContentLoaded", () => {
+      // (Booking summary & passenger details are loaded from local storage)
+      // No changes here.
+    });
+  </script>
+</body>
+</html>
